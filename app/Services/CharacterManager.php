@@ -1588,12 +1588,12 @@ class CharacterManager extends Service {
             if ($data['action'] == 'Approve') {
                 $transfer->is_approved = 1;
                 $transfer->data = json_encode([
-                    'staff_id' => $user->id,
-                    'cooldown' => $data['cooldown'] ?? Settings::get('transfer_cooldown'),
-                    'is_giftable' => $data['is_giftable'] ?? 0,
+                    'staff_id'     => $user->id,
+                    'cooldown'     => $data['cooldown'] ?? Settings::get('transfer_cooldown'),
+                    'is_giftable'  => $data['is_giftable'] ?? 0,
                     'is_tradeable' => $data['is_tradeable'] ?? 0,
-                    'is_sellable' => $data['is_sellable'] ?? 0,
-                    'sale_value' => $data['sale_value'] ?? 0.00,
+                    'is_sellable'  => $data['is_sellable'] ?? 0,
+                    'sale_value'   => $data['sale_value'] ?? 0.00,
                 ]);
 
                 // Process the character move if the recipient has already accepted the transfer
@@ -1670,9 +1670,9 @@ class CharacterManager extends Service {
      * @param \App\Models\Character\Character $character
      * @param \App\Models\User\User           $recipient
      * @param string                          $type
-     * @param array                           $array
      * @param int                             $cooldown
      * @param string                          $logType
+     * @param mixed                           $data
      */
     public function moveCharacter($character, $recipient, $type, $data, $cooldown = -1, $logType = null) {
         $sender = $character->user;
@@ -1703,10 +1703,10 @@ class CharacterManager extends Service {
         }
         if (isset($data)) {
             $character->update([
-                'is_giftable' => $data['is_giftable'] ?? $character->is_giftable,
+                'is_giftable'  => $data['is_giftable'] ?? $character->is_giftable,
                 'is_tradeable' => $data['is_tradeable'] ?? $character->is_tradable,
-                'is_sellable' => $data['is_sellable'] ?? $character->is_sellable,
-                'sale_value' => $data['sale_value'] ?? $character->sale_value,
+                'is_sellable'  => $data['is_sellable'] ?? $character->is_sellable,
+                'sale_value'   => $data['sale_value'] ?? $character->sale_value,
             ]);
         }
         if ($cooldown < 0) {
