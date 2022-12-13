@@ -672,11 +672,21 @@ class TradeManager extends Service {
             $recipientCharacters = Character::where('user_id', $trade->recipient_id)->where('trade_id', $trade->id)->get();
 
             foreach ($senderCharacters as $character) {
-                $characterManager->moveCharacter($character, $trade->recipient, 'Trade [<a href="'.$trade->url.'">#'.$trade->id.'</a>]', null, $cooldowns[$character->id] ?? $defaultCooldown, 'Transferred in trade');
+                $characterManager->moveCharacter($character, $trade->recipient, 'Trade [<a href="'.$trade->url.'">#'.$trade->id.'</a>]', [
+                    'is_giftable' => $data['is_giftable'][$character->id] ?? 0,
+                    'is_tradeable' => $data['is_tradeable'][$character->id] ?? 0,
+                    'is_sellable' => $data['is_sellable'][$character->id] ?? 0,
+                    'sale_value' => $data['sale_value'][$character->id] ?? 0.00,
+                ], $cooldowns[$character->id] ?? $defaultCooldown, 'Transferred in trade');
             }
 
             foreach ($recipientCharacters as $character) {
-                $characterManager->moveCharacter($character, $trade->sender, 'Trade [<a href="'.$trade->url.'">#'.$trade->id.'</a>]', null, $cooldowns[$character->id] ?? $defaultCooldown, 'Transferred in trade');
+                $characterManager->moveCharacter($character, $trade->sender, 'Trade [<a href="'.$trade->url.'">#'.$trade->id.'</a>]', [
+                    'is_giftable' => $data['is_giftable'][$character->id] ?? null,
+                    'is_tradeable' => $data['is_tradeable'][$character->id] ?? null,
+                    'is_sellable' => $data['is_sellable'][$character->id] ?? null,
+                    'sale_value' => $data['sale_value'][$character->id] ?? null,
+                ], $cooldowns[$character->id] ?? $defaultCooldown, 'Transferred in trade');
             }
 
             Character::where('trade_id', $trade->id)->update(['trade_id' => null]);

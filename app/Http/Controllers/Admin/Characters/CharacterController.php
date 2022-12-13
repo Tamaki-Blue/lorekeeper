@@ -722,7 +722,7 @@ class CharacterController extends Controller {
         }
 
         $action = strtolower($request->get('action'));
-        if ($action == 'approve' && $service->approveTrade($request->only(['action', 'cooldowns']) + ['id' => $id], Auth::user())) {
+        if ($action == 'approve' && $service->approveTrade($request->only(['action', 'cooldowns', 'is_giftable', 'is_tradeable', 'is_sellable', 'sale_value']) + ['id' => $id], Auth::user())) {
             flash('Trade approved.')->success();
         } elseif ($action == 'reject' && $service->rejectTrade($request->only(['action', 'reason']) + ['id' => $id], Auth::user())) {
             flash('Trade rejected.')->success();

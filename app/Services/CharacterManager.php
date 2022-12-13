@@ -1703,10 +1703,10 @@ class CharacterManager extends Service {
         }
         if (isset($data)) {
             $character->update([
-                'is_giftable' => $data['is_giftable'] ?? 0,
-                'is_tradeable' => $data['is_tradeable'] ?? 0,
-                'is_sellable' => $data['is_sellable'] ?? 0,
-                'sale_value' => $data['sale_value'] ?? 0.00,
+                'is_giftable' => $data['is_giftable'] ?? $character->is_giftable,
+                'is_tradeable' => $data['is_tradeable'] ?? $character->is_tradable,
+                'is_sellable' => $data['is_sellable'] ?? $character->is_sellable,
+                'sale_value' => $data['sale_value'] ?? $character->sale_value,
             ]);
         }
         if ($cooldown < 0) {
