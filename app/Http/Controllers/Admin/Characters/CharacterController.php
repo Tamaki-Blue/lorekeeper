@@ -622,7 +622,7 @@ class CharacterController extends Controller {
 
         $action = $request->get('action');
 
-        if ($service->processTransferQueue($request->only(['action', 'cooldown', 'reason']) + ['transfer_id' => $id], Auth::user())) {
+        if ($service->processTransferQueue($request->only(['action', 'cooldown', 'reason', 'is_giftable', 'is_tradeable', 'is_sellable', 'sale_value']) + ['transfer_id' => $id], Auth::user())) {
             if (strtolower($action) == 'approve') {
                 flash('Transfer '.strtolower($action).'d.')->success();
             } else {

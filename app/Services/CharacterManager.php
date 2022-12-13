@@ -1430,7 +1430,7 @@ class CharacterManager extends Service {
 
             $sender = $character->user;
 
-            $this->moveCharacter($character, $recipient, 'Transferred by '.$user->displayName.(isset($data['reason']) ? ': '.$data['reason'] : ''), $data['cooldown'] ?? -1);
+            $this->moveCharacter($character, $recipient, 'Transferred by '.$user->displayName.(isset($data['reason']) ? ': '.$data['reason'] : ''), null, $data['cooldown'] ?? -1);
 
             // Add notifications for the old and new owners
             if ($sender) {
@@ -1488,7 +1488,7 @@ class CharacterManager extends Service {
                     if (isset($transfer->data['cooldown'])) {
                         $cooldown = $transfer->data['cooldown'];
                     }
-                    $this->moveCharacter($transfer->character, $transfer->recipient, 'User Transfer', $cooldown);
+                    $this->moveCharacter($transfer->character, $transfer->recipient, 'User Transfer', $transfer->data, $cooldown);
                     if (!Settings::get('open_transfers_queue')) {
                         $transfer->data = json_encode([
                             'cooldown' => $cooldown,
@@ -1590,6 +1590,10 @@ class CharacterManager extends Service {
                 $transfer->data = json_encode([
                     'staff_id' => $user->id,
                     'cooldown' => $data['cooldown'] ?? Settings::get('transfer_cooldown'),
+                    'is_giftable' => $data['is_giftable'] ?? 0,
+                    'is_tradeable' => $data['is_tradeable'] ?? 0,
+                    'is_sellable' => $data['is_sellable'] ?? 0,
+                    'sale_value' => $data['sale_value'] ?? 0.00,
                 ]);
 
                 // Process the character move if the recipient has already accepted the transfer
@@ -1597,7 +1601,7 @@ class CharacterManager extends Service {
                     if (!$this->logAdminAction($user, 'Approved Transfer', 'Approved transfer of '.$transfer->character->displayname.' to '.$transfer->recipient->displayname)) {
                         throw new \Exception('Failed to log admin action.');
                     }
-                    $this->moveCharacter($transfer->character, $transfer->recipient, 'User Transfer', $data['cooldown'] ?? -1);
+                    $this->moveCharacter($transfer->character, $transfer->recipient, 'User Transfer', $data, $data['cooldown'] ?? -1);
 
                     // Notify both parties of the successful transfer
                     Notifications::create('CHARACTER_TRANSFER_APPROVED', $transfer->sender, [
@@ -1665,11 +1669,12 @@ class CharacterManager extends Service {
      *
      * @param \App\Models\Character\Character $character
      * @param \App\Models\User\User           $recipient
-     * @param string                          $data
+     * @param string                          $type
+     * @param array                           $array
      * @param int                             $cooldown
      * @param string                          $logType
      */
-    public function moveCharacter($character, $recipient, $data, $cooldown = -1, $logType = null) {
+    public function moveCharacter($character, $recipient, $type, $data, $cooldown = -1, $logType = null) {
         $sender = $character->user;
         if (!$sender) {
             $sender = $character->owner_url;
@@ -1695,6 +1700,14 @@ class CharacterManager extends Service {
         } else {
             $character->owner_url = $recipient;
             $character->user_id = null;
+        }
+        if (isset($data)) {
+            $character->update([
+                'is_giftable' => $data['is_giftable'] ?? 0,
+                'is_tradeable' => $data['is_tradeable'] ?? 0,
+                'is_sellable' => $data['is_sellable'] ?? 0,
+                'sale_value' => $data['sale_value'] ?? 0.00,
+            ]);
         }
         if ($cooldown < 0) {
             // Add the default amount from settings
@@ -1740,7 +1753,7 @@ class CharacterManager extends Service {
             $recipient && is_object($recipient) ? $recipient->url : ($recipient ?: null),
             $character->id,
             $logType ? $logType : ($character->is_myo_slot ? 'MYO Slot Transferred' : 'Character Transferred'),
-            $data,
+            $type,
             'user'
         );
     }
